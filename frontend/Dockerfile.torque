@@ -25,6 +25,9 @@ MAINTAINER Carlos de Alfonso <caralla@upv.es>
 # This is the part to install the packages for torque
 # -------------------------------------------------------------------
 
+# Open Torque ports
+EXPOSE 15001 15002 15003 15004 1023
+
 # Packages to install torque
 RUN apt-get update && apt-get install -y torque-server torque-client torque-mom torque-pam
 

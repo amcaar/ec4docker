@@ -25,6 +25,9 @@ MAINTAINER Carlos de Alfonso <caralla@upv.es>
 # This is the part to install the packages
 # -------------------------------------------------------------------
 
+# Open Slurm ports
+EXPOSE 6817 6818
+
 # Packages to install slurm
 RUN apt-get update && apt-get install -y libmunge2 libpq5 openssl-blacklist munge libmunge-dev gcc make
 
