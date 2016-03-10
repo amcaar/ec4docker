@@ -43,7 +43,7 @@ WN_CONTAINERNAME=$(docker -H $EC4DOCK_HOST run -h $WN_NAME --privileged -e "EC4D
 [ $? -ne 0 ] && echo "could not create the new node $WN_NAME" && exit 1
 
 # We get the IP address for the new node
-WN_IPADDR=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' $WN_CONTAINERNAME)
+WN_IPADDR=$(docker -H $EC4DOCK_HOST inspect -f '{{.NetworkSettings.IPAddress}}' $WN_CONTAINERNAME)
 [ $? -ne 0 -o "$WN_IPADDR" == "" ] && echo "could not determine the IP address for the new node" && docker rm $(docker stop $WM_CONTAINERNAME) && exit 1
 
 # We have to remove the entries in /etc/hosts that correspond to the node name
