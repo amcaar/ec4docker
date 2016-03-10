@@ -24,8 +24,8 @@
 
 # Set the name of the container that acts as the server
 EC4DOCK_SERVERNAME=${EC4DOCK_SERVERNAME:-ec4docker}
-#EC4DOCK_WN_IMAGENAME=${EC4DOCK_WN_IMAGENAME:-ec4docker:wn}
-EC4DOCK_WN_IMAGENAME="amcaar/"${EC4DOCK_WN_IMAGENAME:-amcaar/ec4docker:wn}
+EC4DOCK_WN_IMAGENAME=${EC4DOCK_WN_IMAGENAME:-ec4docker:wn}
+#EC4DOCK_WN_IMAGENAME="amcaar/"${EC4DOCK_WN_IMAGENAME:-amcaar/ec4docker:wn}
 # Modify with the ip of the frontend machine
 EC4DOCK_HOST="localhost:4000"
 
