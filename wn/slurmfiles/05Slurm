@@ -19,6 +19,14 @@
 # limitations under the License.
 #
 
+# Basic configuration of the computing nodes
+cat >> /usr/local/etc/slurm.conf << EOF
+ControlMachine=${EC4DOCK_SERVERNAME} 
+NodeName=${EC4DOCK_NODEBASENAME}[1-$EC4DOCK_MAXNODES] CPUs=1 State=UNKNOWN
+PartitionName=debug Nodes=${EC4DOCK_NODEBASENAME}[1-$EC4DOCK_MAXNODES] Default=YES MaxTime=INFINITE State=UP
+EOF
+
+# Ensure that slurmd is on 
 pgrep slurmd || slurmd
 scontrol reconfig
 scontrol update NodeName=$(hostname) State=RESUME
