@@ -22,6 +22,7 @@
 NODENAME=$1
 IPADDR=$2
 CONTAINERNAME=$3
+EC4DOCK_HOST=$4
 
 docker -H $EC4DOCK_HOST cp /etc/munge/munge.key $CONTAINERNAME:/etc/munge/munge.key 2> /dev/null > /dev/null
 [ $? -ne 0 ] && echo "error staging in the munge keyfile" && exit 1
