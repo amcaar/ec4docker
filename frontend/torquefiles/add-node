@@ -22,6 +22,7 @@
 NODENAME=$1
 IPADDR=$2
 CONTAINERNAME=$3
+EC4DOCK_HOST=$4
 
 # And now we have to restart the torque server
 
