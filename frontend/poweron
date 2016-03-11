@@ -57,7 +57,7 @@ cp /tmp/newhosts /etc/hosts
 rm /tmp/newhosts 
 
 # Finally we add the node in the torque server
-/opt/ec4docker/add-node $WN_NAME $WN_IPADDR $WN_CONTAINERNAME
+/opt/ec4docker/add-node $WN_NAME $WN_IPADDR $WN_CONTAINERNAME $EC4DOCK_HOST
 )&
 
 exit 0
