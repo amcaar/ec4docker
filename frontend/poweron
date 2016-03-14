@@ -28,22 +28,24 @@ EC4DOCK_WN_IMAGENAME=${EC4DOCK_WN_IMAGENAME:-ec4docker:wn}
 #EC4DOCK_WN_IMAGENAME="amcaar/"${EC4DOCK_WN_IMAGENAME:-amcaar/ec4docker:wn}
 # Modify with the ip of the frontend machine
 EC4DOCK_HOST="localhost:4000"
+EC4DOCK_NETWORK="ec4dnet"
 
 [ $# -ne 1 ] && echo "usage: $0 <nodenameid>" && exit 1
 WN_NAME=$1
 
 # Get the server IP address
-EC4DOCK_SERVERIP=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' $EC4DOCK_SERVERNAME)
+EC4DOCK_SERVERIP=$(docker inspect -f '{{.NetworkSettings.Networks.ec4dnet.IPAddress}}' $EC4DOCK_SERVERNAME)
 #EC4DOCK_SERVERIP=$(docker -H $EC4DOCK_HOST inspect -f '{{.NetworkSettings.IPAddress}}' $EC4DOCK_SERVERNAME)
 [ $? -ne 0 ] && echo "could not get ip from server $EC4DOCK_SERVERNAME" && exit 1
 
 (
 # Create a new container
-WN_CONTAINERNAME=$(docker -H $EC4DOCK_HOST run -h $WN_NAME --privileged -e "EC4DOCK_SERVERIP=$EC4DOCK_SERVERIP" -e "EC4DOCK_SERVERNAME=$EC4DOCK_SERVERNAME" --name $WN_NAME -id $EC4DOCK_WN_IMAGENAME)
+WN_CONTAINERNAME=$(docker -H $EC4DOCK_HOST run --net=$EC4DOCK_NETWORK -h $WN_NAME --privileged -e "EC4DOCK_SERVERIP=$EC4DOCK_SERVERIP" -e "EC4DOCK_SERVERNAME=$EC4DOCK_SERVERNAME" --name $WN_NAME -id $EC4DOCK_WN_IMAGENAME)
 [ $? -ne 0 ] && echo "could not create the new node $WN_NAME" && exit 1
 
 # We get the IP address for the new node
-WN_IPADDR=$(docker -H $EC4DOCK_HOST inspect -f '{{.NetworkSettings.IPAddress}}' $WN_CONTAINERNAME)
+#WN_IPADDR=$(docker -H $EC4DOCK_HOST inspect -f '{{.NetworkSettings.IPAddress}}' $WN_CONTAINERNAME)
+WN_IPADDR=$(docker -H $EC4DOCK_HOST inspect -f '{{.NetworkSettings.Networks.ec4dnet.IPAddress}}' $WN_CONTAINERNAME)
 [ $? -ne 0 -o "$WN_IPADDR" == "" ] && echo "could not determine the IP address for the new node" && docker -H $EC4DOCK_HOST rm $(docker -H $EC4DOCK_HOST stop $WM_CONTAINERNAME) && exit 1
 
 # We have to remove the entries in /etc/hosts that correspond to the node name
