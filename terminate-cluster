@@ -67,7 +67,7 @@ function find_nodes() {
 }
 
 # Check if the server exists and get its IP address
-IPADDR=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' $EC4DOCK_SERVERNAME 2> /dev/null)
+IPADDR=$(docker inspect -f '{{.NetworkSettings.Networks.ec4dnet.IPAddress}}' $EC4DOCK_SERVERNAME 2> /dev/null)
 
 # If the front-end exists, we'll try to terminate it
 if [ $? -eq 0 ]; then
