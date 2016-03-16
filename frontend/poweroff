@@ -21,8 +21,7 @@
 
 [ $# -ne 1 ] && echo "usage: $0 <nodename>" && exit 1
 WN_NAME=$1
-# Modify with the ip of the frontend machine
-EC4DOCK_HOST="localhost:4000"
+EC4DOCK_HOST=${EC4DOCK_HOST:-localhost:4000}
 
 # Get info about the node just to test that it exists in docker
 docker inspect $WN_NAME > /dev/null 2> /dev/null
