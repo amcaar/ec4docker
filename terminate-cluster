@@ -48,7 +48,10 @@ fi
 # We set the default values if they are not set
 EC4DOCK_SERVERNAME=${EC4DOCK_SERVERNAME:-ec4docker}
 EC4DOCK_NODEBASENAME=${EC4DOCK_NODEBASENAME:-ec4dockernode}
-EC4DOCK_HOST="localhost:4000"
+
+# Get swarm master IP
+EC4DOCK_HOST=($(/bin/hostname -i))
+EC4DOCK_HOST=${EC4DOCK_HOST:-localhost:4000}
 
 function find_nodes() {
     # We'll try to find any docker container with the corresponding name whose associated server has
