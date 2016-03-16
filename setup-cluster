@@ -46,6 +46,9 @@ else
     source $CONFIG_FILE
 fi
 
+# Get swarm master IP
+EC4DOCK_HOST=($(/bin/hostname -i))
+
 # Set the default values if they are not set
 EC4DOCK_SERVERNAME=${EC4DOCK_SERVERNAME:-ec4docker}
 EC4DOCK_MAXNODES=${EC4DOCK_MAXNODES:-4}
@@ -55,6 +58,7 @@ EC4DOCK_FRONTEND_IMAGENAME="amcaar/"${EC4DOCK_FRONTEND_IMAGENAME:-amcaar/ec4dock
 EC4DOCK_WN_IMAGENAME="amcaar/"${EC4DOCK_WN_IMAGENAME:-amcaar/ec4docker:wn}
 EC4DOCK_NODEBASENAME=${EC4DOCK_NODEBASENAME:-ec4docknode}
 EC4DOCK_NETWORK="ec4dnet"
+EC4DOCK_HOST=${EC4DOCK_HOST:-localhost:4000}
 
 # We'll try to terminate the cluster if it exists
 if [ "$ASSUME_YES" == "True" ]; then
@@ -65,7 +69,7 @@ fi
 
 # We execute the container
 # - we have to run it in privileged mode because of torque requirements
-docker run --net=$EC4DOCK_NETWORK -p 22 --privileged -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):/bin/docker -e "EC4DOCK_FRONTEND_IMAGENAME=$EC4DOCK_FRONTEND_IMAGENAME" -e "EC4DOCK_WN_IMAGENAME=$EC4DOCK_WN_IMAGENAME" -e "EC4DOCK_SERVERNAME=$EC4DOCK_SERVERNAME" -e "EC4DOCK_MAXNODES=$EC4DOCK_MAXNODES" -e "EC4DOCK_NODEBASENAME=$EC4DOCK_NODEBASENAME" -h $EC4DOCK_SERVERNAME --name $EC4DOCK_SERVERNAME -id $EC4DOCK_FRONTEND_IMAGENAME
+docker run --net=$EC4DOCK_NETWORK -p 22 --privileged -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):/bin/docker -e "EC4DOCK_FRONTEND_IMAGENAME=$EC4DOCK_FRONTEND_IMAGENAME" -e "EC4DOCK_WN_IMAGENAME=$EC4DOCK_WN_IMAGENAME" -e "EC4DOCK_SERVERNAME=$EC4DOCK_SERVERNAME" -e "EC4DOCK_MAXNODES=$EC4DOCK_MAXNODES" -e "EC4DOCK_NODEBASENAME=$EC4DOCK_NODEBASENAME" -e "EC4DOCK_HOST=$EC4DOCK_HOST" -h $EC4DOCK_SERVERNAME --name $EC4DOCK_SERVERNAME -id $EC4DOCK_FRONTEND_IMAGENAME
 
 if [ "$DEPLOY_NODES" == "True" ]; then
     echo "waiting a bit to deploy the frontend"
