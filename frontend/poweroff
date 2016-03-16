@@ -25,6 +25,7 @@ EC4DOCK_HOST=${EC4DOCK_HOST:-localhost:4000}
 
 # Get info about the node just to test that it exists in docker
 docker inspect $WN_NAME > /dev/null 2> /dev/null
+#docker -H $EC4DOCK_HOST inspect $WN_NAME > /dev/null 2> /dev/null
 [ $? -ne 0 ] && echo "could not find any container with name $WN_NAME" && exit 1
 
 # We'll stop the node
@@ -46,7 +47,7 @@ echo "127.0.0.1 $WN_NAME.localdomain $WN_NAME" >> /tmp/newhosts
 cp /tmp/newhosts /etc/hosts
 rm /tmp/newhosts 
 
-# Finally we add the node in the torque server
+# Finally we remove the node in the lrms server
 /opt/ec4docker/remove-node $WN_NAME
 )&
 
