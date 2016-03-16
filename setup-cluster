@@ -47,7 +47,7 @@ else
 fi
 
 # Get swarm master IP
-EC4DOCK_HOST=($(/bin/hostname -i))
+EC4DOCK_HOST=($(/bin/hostname -i):4000)
 
 # Set the default values if they are not set
 EC4DOCK_SERVERNAME=${EC4DOCK_SERVERNAME:-ec4docker}
