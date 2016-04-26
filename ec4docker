@@ -137,9 +137,7 @@ function find_nodes() {
 }
 
 function frontend_exists() {
-    IPADDR=$(docker inspect -f '{{.NetworkSettings.Networks.ec4dnet.IPAddress}}' $EC4DOCK_SERVERNAME 2> /dev/null)
-	# TODO Hay que consultar la informacion de la red overlay asociada al cluster 
-    #IPADDR=$(docker inspect -f "{{.NetworkSettings.Networks.$EC4DOCK_NETWORK.IPAddress}}" $EC4DOCK_SERVERNAME 2> /dev/null)
+    IPADDR=$(docker inspect -f {{.NetworkSettings.Networks.$EC4DOCK_NETWORK.IPAddress}} $EC4DOCK_SERVERNAME 2> /dev/null)
 	
     if [ $? -eq 0 ]; then
         return 0
@@ -157,9 +155,7 @@ function create_overlay(){
 
 function terminate_cluster() {
     # Check if the server exists and get its IP address
-    IPADDR=$(docker inspect -f '{{.NetworkSettings.Networks.ec4dnet.IPAddress}}' $EC4DOCK_SERVERNAME 2> /dev/null)
-	# TODO Hay que consultar la informacion de la red overlay asociada al cluster 
-    #IPADDR=$(docker inspect -f "{{.NetworkSettings.Networks.$EC4DOCK_NETWORK.IPAddress}}" $EC4DOCK_SERVERNAME 2> /dev/null)
+    IPADDR=$(docker inspect -f {{.NetworkSettings.Networks.$EC4DOCK_NETWORK.IPAddress}} $EC4DOCK_SERVERNAME 2> /dev/null)
     
     # If the front-end exists, we'll try to terminate it
     if [ $? -eq 0 ]; then
@@ -224,9 +220,7 @@ function setup_cluster() {
 
 #TODO esta opcion deberia traducirse en listar los clusters que hay desplegados y puede tener sentido que haya otra para mostrar info de un cluster completo
 if [ "$SHOW_CLUSTERS" == "True" ]; then
-	IPADDR=$(docker inspect -f '{{.NetworkSettings.Networks.ec4dnet.IPAddress}}' $EC4DOCK_SERVERNAME 2> /dev/null)
-	# TODO Hay que consultar la informacion de la red overlay asociada al cluster 
-    #IPADDR=$(docker inspect -f "{{.NetworkSettings.Networks.$EC4DOCK_NETWORK.IPAddress}}" $EC4DOCK_SERVERNAME 2> /dev/null)
+    IPADDR=$(docker inspect -f {{.NetworkSettings.Networks.$EC4DOCK_NETWORK.IPAddress}} $EC4DOCK_SERVERNAME 2> /dev/null)
     if [ $? -eq 0 ]; then
         echo -n "A cluster with name $EC4DOCK_SERVERNAME is running with IP $IPADDR. Its nodes are: "
         echo "$(find_nodes $IPADDR)"  
