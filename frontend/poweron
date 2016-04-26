@@ -25,6 +25,7 @@
 # Set the name of the container that acts as the server
 EC4DOCK_SERVERNAME=${EC4DOCK_SERVERNAME:-ec4docker}
 EC4DOCK_WN_IMAGENAME=${EC4DOCK_WN_IMAGENAME:-ec4docker:wn}
+#EC4DOCK_WN_DOCKER_OPTIONS=${$EC4DOCK_WN_DOCKER_OPTIONS:-}
 EC4DOCK_HOST=${EC4DOCK_HOST:-localhost:4000}
 EC4DOCK_NETWORK="ec4dnet"
 
@@ -38,7 +39,7 @@ EC4DOCK_SERVERIP=$(docker inspect -f '{{.NetworkSettings.Networks.ec4dnet.IPAddr
 
 (
 # Create a new container
-WN_CONTAINERNAME=$(docker -H $EC4DOCK_HOST run --net=$EC4DOCK_NETWORK -h $WN_NAME --privileged -e "EC4DOCK_SERVERIP=$EC4DOCK_SERVERIP" -e "EC4DOCK_SERVERNAME=$EC4DOCK_SERVERNAME" --name $WN_NAME -id $EC4DOCK_WN_IMAGENAME)
+WN_CONTAINERNAME=$(docker -H $EC4DOCK_HOST run --net=$EC4DOCK_NETWORK -h $WN_NAME --privileged $EC4DOCK_WN_DOCKER_OPTIONS -e EC4DOCK_WN_DOCKER_OPTIONS="$EC4DOCK_WN_DOCKER_OPTIONS" -e "EC4DOCK_SERVERIP=$EC4DOCK_SERVERIP" -e "EC4DOCK_SERVERNAME=$EC4DOCK_SERVERNAME" --name $WN_NAME -id $EC4DOCK_WN_IMAGENAME)
 [ $? -ne 0 ] && echo "could not create the new node $WN_NAME" && exit 1
 
 # We get the IP address for the new node
