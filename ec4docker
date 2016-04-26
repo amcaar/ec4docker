@@ -51,6 +51,7 @@ ASSUME_YES=False
 SETUP_CLUSTER=False
 TERMINATE_CLUSTER=False
 SHOW_CLUSTERS=False
+LIST_CLUSTERS=False
 MULTIFLAG=
 ARR=( )
 n=0
@@ -68,14 +69,15 @@ while [ $# -gt 0 ]; do
 done
 n=0
 
-#TODO habra que leer el nombre del cluster en el caso de operaciones como terminate y deploy_nodes 
+#TODO habra que leer el nombre del cluster en el caso de operaciones como terminate y list -> CONSULTAR A CARLOS
+#TODO: tambien estaria bien definir una operacion que sea 'show' para mostrar detalles de un cluster concreto y 'list' dejarla para listar todos los clusters que hayan en el fichero clusters.aux
 while [ $n -lt ${#ARR[@]} ]; do
     case ${ARR[$n]} in
         --list | -l)            SHOW_CLUSTERS=True;;
         --create | -c)          SETUP_CLUSTER=True;;
         --terminate | -t)       TERMINATE_CLUSTER=True;;
         --deploy-nodes | -d)    DEPLOY_NODES=True;;
-	    --yes | -y)		        ASSUME_YES=True;;
+        --yes | -y)             ASSUME_YES=True;;
         --config-file | -f)     n=$(($n+1))
                                 [ $n -ge ${#ARR[@]} ] && usage && exit 1
                                 CONFIG_FILE=${ARR[$n]};;
@@ -103,12 +105,6 @@ EC4DOCK_HOST=($(/bin/hostname -i):4000)
 
 # Set the default values if they are not set
 EC4DOCK_SERVERNAME=${EC4DOCK_SERVERNAME:-ec4docker}
-# TODO Esto hay que hacerlo si llaman a ec4docker para crear un cluster nuevo, sino hay que asignar a $EC4DOCK_SERVERNAME el valor de $2 (el nombre que de el usuario)
-RAND=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 4)
-EC4DOCK_SERVERNAME=ec4docker$RAND
-# TODO la red igual, tendra valor nuevo si se llama para crear un cluster nuevo, sino hay que recuperar el nombre para el cluster sobre el que se va a trabajar
-EC4DOCK_NETWORK=ec4dnet$RAND
-
 EC4DOCK_MAXNODES=${EC4DOCK_MAXNODES:-4}
 #EC4DOCK_FRONTEND_IMAGENAME=${EC4DOCK_FRONTEND_IMAGENAME:-ec4docker:frontend}
 EC4DOCK_FRONTEND_IMAGENAME="amcaar/"${EC4DOCK_FRONTEND_IMAGENAME:-amcaar/ec4docker:frontend}
@@ -138,7 +134,7 @@ function find_nodes() {
 
 function frontend_exists() {
     IPADDR=$(docker inspect -f {{.NetworkSettings.Networks.$EC4DOCK_NETWORK.IPAddress}} $EC4DOCK_SERVERNAME 2> /dev/null)
-	
+    
     if [ $? -eq 0 ]; then
         return 0
     else
@@ -148,10 +144,15 @@ function frontend_exists() {
 
 # Function to create an overlay network for the cluster
 function create_overlay(){ 
-    # create overlay network ec4dnet
+    # create overlay network 
     docker network create --driver overlay --subnet=10.0.9.0/24 $EC4DOCK_NETWORK > /dev/null 2> /dev/null
 }
 
+# Function to delete an overlay network
+function destroy_overlay(){ 
+    # destroy overlay network 
+    docker network rm $EC4DOCK_NETWORK > /dev/null 2> /dev/null
+}
 
 function terminate_cluster() {
     # Check if the server exists and get its IP address
@@ -178,9 +179,11 @@ function terminate_cluster() {
                     echo "killing container $EC4DOCK_SERVERNAME"
                     docker stop $EC4DOCK_SERVERNAME > /dev/null 2> /dev/null
                     docker rm $EC4DOCK_SERVERNAME > /dev/null 2> /dev/null
-					
-					# Remove cluster name from clusters.aux file
-					sed -i "/$EC4DOCK_SERVERNAME/d" clusters.aux
+                    
+                    # Remove cluster name from clusters.aux file
+                    sed -i "/$EC4DOCK_SERVERNAME/d" clusters.aux
+                    #Delete overlay network of the cluster
+                    destroy_overlay
             else
                     exit 1
             fi
@@ -191,13 +194,13 @@ function setup_cluster() {
 
     # Create an overlay network
     create_overlay
-	
+    
     # We execute the container
     # - we have to run it in privileged mode because of torque requirements
     docker run --net=$EC4DOCK_NETWORK -p 22 --privileged -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):$(which docker) $EC4DOCK_FRONTEND_DOCKER_OPTIONS -e EC4DOCK_WN_DOCKER_OPTIONS="$EC4DOCK_WN_DOCKER_OPTIONS" -e EC4DOCK_FRONTEND_DOCKER_OPTIONS="$EC4DOCK_FRONTEND_DOCKER_OPTIONS" -e "EC4DOCK_FRONTEND_IMAGENAME=$EC4DOCK_FRONTEND_IMAGENAME" -e "EC4DOCK_WN_IMAGENAME=$EC4DOCK_WN_IMAGENAME" -e "EC4DOCK_SERVERNAME=$EC4DOCK_SERVERNAME" -e "EC4DOCK_MAXNODES=$EC4DOCK_MAXNODES" -e "EC4DOCK_NODEBASENAME=$EC4DOCK_NODEBASENAME" -e "EC4DOCK_HOST=$EC4DOCK_HOST" -h $EC4DOCK_SERVERNAME --name $EC4DOCK_SERVERNAME -id $EC4DOCK_FRONTEND_IMAGENAME
     
-	# Write in an auxiliar file the name of the cluster
-	echo $EC4DOCK_SERVERNAME >> clusters.aux
+    # Write in an auxiliar file the name of the cluster
+    echo $EC4DOCK_SERVERNAME >> clusters.aux
 
     if [ $? -eq 0 ]; then
         if [ "$DEPLOY_NODES" == "True" ]; then
@@ -218,7 +221,7 @@ function setup_cluster() {
     return 0
 }
 
-#TODO esta opcion deberia traducirse en listar los clusters que hay desplegados y puede tener sentido que haya otra para mostrar info de un cluster completo
+#TODO: esta opcion deberia traducirse en listar los clusters que hay desplegados y puede tener sentido que haya otra para mostrar info de un cluster completo
 if [ "$SHOW_CLUSTERS" == "True" ]; then
     IPADDR=$(docker inspect -f {{.NetworkSettings.Networks.$EC4DOCK_NETWORK.IPAddress}} $EC4DOCK_SERVERNAME 2> /dev/null)
     if [ $? -eq 0 ]; then
@@ -227,11 +230,34 @@ if [ "$SHOW_CLUSTERS" == "True" ]; then
     fi
 fi
 
+if [ "$LIST_CLUSTERS" == "True" ]; then
+    while read line           
+    do
+        POS=`expr index "$line" r`
+        RAND=${line:POS} 
+        NET=ec4dnet$RAND
+        IPADDR=$(docker inspect -f {{.NetworkSettings.Networks.$NET.IPAddress}} $line 2> /dev/null)
+        if [ $? -eq 0 ]; then
+            echo -n "Cluster $line is running with IP $IPADDR. Its nodes are: "
+            echo "$(find_nodes $IPADDR)"  
+        fi      
+    done < clusters.aux   
+fi
+
 if [ "$TERMINATE_CLUSTER" == "True" ]; then
+    #TODO: obtain cluster name from command line ($2) 
+    EC4DOCK_SERVERNAME=$2
+    POS=`expr index "$EC4DOCK_SERVERNAME" r`
+    RAND=${EC4DOCK_SERVERNAME:POS} 
+    EC4DOCK_NETWORK=ec4dnet$RAND
     terminate_cluster 
 fi
 
 if [ "$SETUP_CLUSTER" == "True" ]; then
+    # If we are going to create a new cluster, we generate a new random name for the FE and the overlay network
+    RAND=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 4)
+    EC4DOCK_SERVERNAME=ec4docker$RAND
+    EC4DOCK_NETWORK=ec4dnet$RAND
     if frontend_exists; then
         EXIT_ERROR "frontend already exists"
     fi
