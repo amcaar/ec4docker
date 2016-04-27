@@ -21,36 +21,32 @@
 
 function usage() {
     echo "
+                                        EC4Docker - Elastic Cluster for Docker
+                                       ----------------------------------------
+                                         https://github.com/grycap/ec4docker
+                                          Copyright (C) GRyCAP - I3M - UPV 
+    
     USAGE:
-        $0 < [ --list | -l ] [--create|-c] [--deploy-nodes|-d] | [--terminate|-t] > [ [ --config-file | -f ] <config-file> ] [ --help | -h ]"
+        $0 < [[--show|-s] <cluster-name>] [--list|-l] [--create|-c] [--deploy-nodes|-d] | [[--terminate|-t] <cluster-name>] > [[--config-file|-f] <config-file>] [--help|-h]"
     echo "
-# EC4Docker - Elastic Cluster for Docker
-# https://github.com/grycap/ec4docker
-#
-# Copyright (C) GRyCAP - I3M - UPV 
-# Developed by Carlos A. caralla@upv.es
-#
-# Licensed under the Apache License, Version 2.0 (the \"License\");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an \"AS IS\" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+        --show | -s                     Show the details of a already created cluster
+        --list | -l                     List all the clusters deployed in the infrastructure
+        --create | -c                   Create a cluster 
+        --deploy-nodes | -d             Deploy the nodes of the cluster in the creation moment
+        --terminate | -t                Terminate an already created cluster
+        --config-file | -f              Indicate the path of the config file, where the details of the cluster are provided
+        --help | -h                     Show this message and exit  
+
 "
 }
 
 CONFIG_FILE=$PWD/ec4docker.config
+CLUSTER_NAME=
 DEPLOY_NODES=False
 ASSUME_YES=False
 SETUP_CLUSTER=False
 TERMINATE_CLUSTER=False
-SHOW_CLUSTERS=False
+SHOW_CLUSTER=False
 LIST_CLUSTERS=False
 MULTIFLAG=
 ARR=( )
@@ -69,13 +65,18 @@ while [ $# -gt 0 ]; do
 done
 n=0
 
-#TODO habra que leer el nombre del cluster en el caso de operaciones como terminate y list -> CONSULTAR A CARLOS
-#TODO: tambien estaria bien definir una operacion que sea 'show' para mostrar detalles de un cluster concreto y 'list' dejarla para listar todos los clusters que hayan en el fichero clusters.aux
 while [ $n -lt ${#ARR[@]} ]; do
     case ${ARR[$n]} in
-        --list | -l)            SHOW_CLUSTERS=True;;
+        --show | -s)            SHOW_CLUSTER=True
+                                n=$(($n+1))
+                                [ $n -ge ${#ARR[@]} ] && usage && exit 1
+                                CLUSTER_NAME=${ARR[$n]};;
+        --list | -l)            LIST_CLUSTERS=True;;
         --create | -c)          SETUP_CLUSTER=True;;
-        --terminate | -t)       TERMINATE_CLUSTER=True;;
+        --terminate | -t)       TERMINATE_CLUSTER=True
+                                n=$(($n+1))
+                                [ $n -ge ${#ARR[@]} ] && usage && exit 1
+                                CLUSTER_NAME=${ARR[$n]};;
         --deploy-nodes | -d)    DEPLOY_NODES=True;;
         --yes | -y)             ASSUME_YES=True;;
         --config-file | -f)     n=$(($n+1))
@@ -89,7 +90,7 @@ done
 
 function EXIT_ERROR() {
     echo "ERROR: $1" >&2
-    usage
+    #usage
     exit 1
 }
 
@@ -187,6 +188,8 @@ function terminate_cluster() {
             else
                     exit 1
             fi
+    else
+        EXIT_ERROR "There's no container named $EC4DOCK_SERVERNAME"
     fi
 }
 
@@ -221,12 +224,17 @@ function setup_cluster() {
     return 0
 }
 
-#TODO: esta opcion deberia traducirse en listar los clusters que hay desplegados y puede tener sentido que haya otra para mostrar info de un cluster completo
-if [ "$SHOW_CLUSTERS" == "True" ]; then
+if [ "$SHOW_CLUSTER" == "True" ]; then
+    EC4DOCK_SERVERNAME=$CLUSTER_NAME
+    POS=`expr index "$EC4DOCK_SERVERNAME" r`
+    RAND=${EC4DOCK_SERVERNAME:POS} 
+    EC4DOCK_NETWORK=ec4dnet$RAND
     IPADDR=$(docker inspect -f {{.NetworkSettings.Networks.$EC4DOCK_NETWORK.IPAddress}} $EC4DOCK_SERVERNAME 2> /dev/null)
     if [ $? -eq 0 ]; then
         echo -n "A cluster with name $EC4DOCK_SERVERNAME is running with IP $IPADDR. Its nodes are: "
         echo "$(find_nodes $IPADDR)"  
+    else
+        EXIT_ERROR "There's no container named $EC4DOCK_SERVERNAME"
     fi
 fi
 
@@ -245,8 +253,7 @@ if [ "$LIST_CLUSTERS" == "True" ]; then
 fi
 
 if [ "$TERMINATE_CLUSTER" == "True" ]; then
-    #TODO: obtain cluster name from command line ($2) 
-    EC4DOCK_SERVERNAME=$2
+    EC4DOCK_SERVERNAME=$CLUSTER_NAME
     POS=`expr index "$EC4DOCK_SERVERNAME" r`
     RAND=${EC4DOCK_SERVERNAME:POS} 
     EC4DOCK_NETWORK=ec4dnet$RAND
