@@ -14,7 +14,7 @@ This branch of EC4Docker is integrated with [Docker Swarm](https://www.docker.co
 ## How to use it
 1. Create your front-end and working node docker images.
 2. Edit the _ec4docker.config_ file to configure the cluster.
-3. Use _setup-cluster_ script to start the cluster.
+3. Use _ec4docker_ script to start the cluster.
 4. Enter into the cluster.
  
 ## Building the docker images
@@ -24,7 +24,7 @@ Once selected, you need to build the build the _front-end_ and _working node_ ba
 
 ```bash
 docker build -f frontend/Dockerfile.clues -t ec4docker:frontend ./frontend/
-docker build -f wn/Dockerfile.wn -t ec4docker:wn wn/
+docker build -f wn/Dockerfile -t ec4docker:wn wn/
 ```
 
 Then you need to create the images that correspond to the middleware:
