@@ -1,3 +1,4 @@
+# coding: utf-8
 #
 # EC4Docker - Elastic Cluster for Docker
 # https://github.com/grycap/ec4docker
@@ -17,11 +18,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+VERSION="0.10.2"
 
-EC4DOCK_SERVERNAME=ec4docker
-EC4DOCK_MAXNODES=4
-EC4DOCK_FRONTEND_IMAGENAME=ec4dslurm:frontend
-EC4DOCK_WN_IMAGENAME=ec4dslurm:wn
-EC4DOCK_NODEBASENAME=ec4dockernode
-EC4DOCK_NETWORK=ec4dnet
-EC4DOCK_HOST=localhost:4000
+def get():
+    global VERSION
+    return VERSION

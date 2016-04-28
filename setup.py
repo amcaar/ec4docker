@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+# coding: utf-8
 #
 # EC4Docker - Elastic Cluster for Docker
 # https://github.com/grycap/ec4docker
@@ -17,11 +19,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from distutils.core import setup
+from version import VERSION
 
-EC4DOCK_SERVERNAME=ec4docker
-EC4DOCK_MAXNODES=4
-EC4DOCK_FRONTEND_IMAGENAME=ec4dslurm:frontend
-EC4DOCK_WN_IMAGENAME=ec4dslurm:wn
-EC4DOCK_NODEBASENAME=ec4dockernode
-EC4DOCK_NETWORK=ec4dnet
-EC4DOCK_HOST=localhost:4000
+# How to install:
+# $ git clone https://github.com/grycap/ec4docker
+# $ cd ec4docker
+# $ sudo python setup.py install --record installed-files.txt
+
+
+setup(name='ec4docker',
+      version=VERSION,
+      description='Elastic Cluster for Docker',
+      author='Carlos de Alfonso, Amanda Calatrava',
+      author_email='caralla@upv.es',
+      url='http://github.com/grycap/ec4docker',
+      scripts = [ 'ec4docker' ],
+      download_url = 'https://github.com/grycap/ec4docker',
+)

@@ -9,7 +9,7 @@ Features of the cluster:
 - Self-managed elasticity by using [CLUES](https://github.com/grycap/clues).
 - Shared filesystem from frontend to working nodes by using NFS
 
-EC4Docker may seem a bit useless because it is currently deployed on a single cluster, but consider its integration with [Docker Swarm](https://www.docker.com/products/docker-swarm) and you'll have an Elastic Cluster that is deployed over a multi-node infrastructure.
+This branch of EC4Docker is integrated with [Docker Swarm](https://www.docker.com/products/docker-swarm) so you can have an Elastic Cluster that is deployed over a multi-node infrastructure. For that, it is necessary to deploy the Docker Swarm manager together with a service discovey like Consul or Zookeeper inside the machine that will act as the cluster front-end, and also Docker Swarm daemons in the working nodes.
 
 ## How to use it
 1. Create your front-end and working node docker images.
@@ -64,6 +64,8 @@ EC4DOCK_MAXNODES=4
 EC4DOCK_FRONTEND_IMAGENAME=ec4dtorque:frontend
 EC4DOCK_WN_IMAGENAME=ec4dtorque:wn
 EC4DOCK_NODEBASENAME=ec4dockernode
+EC4DOCK_NETWORK=ec4dnet
+EC4DOCK_HOST=localhost:4000
 ```
 
 * And the file _ec4docker-slurm.config_ for the case of Torque:
@@ -73,6 +75,8 @@ EC4DOCK_MAXNODES=4
 EC4DOCK_FRONTEND_IMAGENAME=ec4dslurm:frontend
 EC4DOCK_WN_IMAGENAME=ec4dslurm:wn
 EC4DOCK_NODEBASENAME=ec4dockernode
+EC4DOCK_NETWORK=ec4dnet
+EC4DOCK_HOST=localhost:4000
 ```
 
 __NOTE__: In this file the cluster will be named _ec4docker_ and the maximum number of working nodes is set to 4. You are advised to change the name of your frontend and the amount of working nodes that will be available.
@@ -87,7 +91,7 @@ $ modprobe nfsd
 
 In order to create your cluster, defined in _ec4docker-torque.config_ file, you can issue the following command:
 ```bash
-$ ./setup-cluster -f ec4docker-torque.config
+$ ./ec4docker -f ec4docker-torque.config --create
 ```
 
 __NOTE__: The settings of the clusters are those that are set in file _ec4docker-torque.config_ file. Take note of those settings because you will need them in order to access the cluster. In special, the name of the cluster which is in _EC4DOCK_SERVERNAME_.
@@ -135,6 +139,12 @@ __NOTE__: For the non-elasic version, you can power on some nodes from inside th
 ```bash
 $ /opt/ec4docker/poweron ec4dockernode1
 $ /opt/ec4docker/poweron ec4dockernode2
+```
+## Terminate the cluster
+If you want to destroy your cluster, you only need to call ec4docker and indicate the cluster you want to delete. An example of the command like is provided next (the name of the container depends on your configuration; i.e. the _ec4docker.config_ file):
+
+```bash
+$ ./ec4docker -f ec4docker.config --terminate
 ```
 
 ## Troubleshooting
