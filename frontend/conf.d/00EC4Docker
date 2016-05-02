@@ -25,6 +25,8 @@ export EC4DOCK_NODEBASENAME=${EC4DOCK_NODEBASENAME:-ec4docknode}
 export EC4DOCK_SERVERIP=${EC4DOCK_SERVERIP:-127.0.0.1}
 export EC4DOCK_NETWORK=${EC4DOCK_NETWORK:-ec4dnet}
 export EC4DOCK_HOST=${EC4DOCK_HOST:-localhost:4000}
+export EC4DOCK_FRONTEND_IMAGENAME="amcaar/"${EC4DOCK_FRONTEND_IMAGENAME:-amcaar/ec4docker:frontend}
+export EC4DOCK_WN_IMAGENAME="amcaar/"${EC4DOCK_WN_IMAGENAME:-amcaar/ec4docker:wn}
 
 mkdir /etc/ec4docker
 cat > /etc/ec4docker/ec4docker.conf << EOF
