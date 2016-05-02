@@ -41,7 +41,7 @@ RUN echo 'ubuntu:ubuntu' | chpasswd
 # -------------------------------------------------------------------
 
 # Packages to be able to run docker from inside the container
-RUN apt-get -y install libnfnetlink0 libsystemd-journal0 libapparmor1
+RUN apt-get -y install libnfnetlink0 libsystemd-journal0 libapparmor1 libltdl-dev
 
 ADD ./poweron ./poweroff ./add-node ./remove-node /opt/ec4docker/
 
