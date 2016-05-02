@@ -45,7 +45,7 @@ RUN ssh-keygen -N "" -f /root/.ssh/id_rsa && cp /root/.ssh/id_rsa.pub /root/.ssh
 # -------------------------------------------------------------------
 
 # Packages to be able to run docker from inside the container
-RUN apt-get -y install libnfnetlink0 libsystemd-journal0 libapparmor1
+RUN apt-get -y install libnfnetlink0 libsystemd-journal0 libapparmor1 libltdl7
 
 ADD ./poweron ./poweroff ./add-node ./remove-node /opt/ec4docker/
 
