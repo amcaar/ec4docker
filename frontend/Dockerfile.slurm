@@ -35,7 +35,7 @@ RUN apt-get update && apt-get install -y libmunge2 libpq5 openssl-blacklist mung
 # Compile SLURM
 #
 
-RUN wget http://www.schedmd.com/download/archive/slurm-14.11.3.tar.bz2 -O /tmp/slurm.tar.bz2 && cd /tmp && tar xjf slurm.tar.bz2 && cd /tmp/slurm-14.11.3 && ./configure --with-blcr=/usr/local/bin && make && make install
+RUN wget http://www.schedmd.com/download/archive/slurm-14.11.3.tar.bz2 -O /tmp/slurm.tar.bz2 && cd /tmp && tar xjf slurm.tar.bz2 && cd /tmp/slurm-14.11.3 && ./configure && make && make install
 RUN useradd -m -s /bin/bash slurm
 RUN echo 'slurm:slurm' | chpasswd
 RUN mkdir -p /var/spool/slurm /var/log/slurm /var/slurm/checkpoint && chown slurm:slurm /var/spool/slurm /var/log/slurm /var/slurm/checkpoint
