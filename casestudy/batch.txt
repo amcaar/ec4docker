@@ -1,0 +1,7 @@
+set autoclose=yes nowarn=yes
+execute cynmix.nex  
+lset nst=6 rates=gamma
+mcmc ngen=100000 savebrlens=yes file=cynmix.nex1  
+mcmc file=cynmix.nex2  
+mcmc file=cynmix.nex3  
+quit
