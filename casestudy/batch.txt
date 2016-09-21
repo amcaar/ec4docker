@@ -1,5 +1,5 @@
 set autoclose=yes nowarn=yes
 execute /tmp/mrbayes-3.2.6/src/cynmix.nex  
 lset nst=6 rates=gamma
-mcmc ngen=180000 savebrlens=yes file=cynmix.nex1  
+mcmc ngen=170000 savebrlens=yes file=cynmix.nex1  
 quit
